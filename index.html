@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>LUMIÈRE Luxury Store</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <!-- Updated Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -29,6 +34,9 @@
             --error: #EF4444;
             --warning: #F59E0B;
             --info: #3B82F6;
+            --pink: #EC4899;
+            --teal: #14B8A6;
+            --orange: #F97316;
         }
 
         body {
@@ -226,6 +234,7 @@
             border: 2px solid transparent;
             transition: all 0.3s;
             flex-shrink: 0;
+            position: relative;
         }
 
         .profile-btn:hover {
@@ -585,10 +594,60 @@
             width: 100%;
         }
 
-        .products-grid {
+        /* 2-Column Grid with Scroll Reveal Animation */
+        .two-column-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .two-column-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .two-column-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .two-column-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .two-column-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        /* Scroll Reveal Animation for 2-Column Grid */
+        .two-column-grid .product-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+
+        .two-column-grid .product-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger animation for 2-column grid */
+        .two-column-grid .product-card:nth-child(2n) {
+            transition-delay: 0.1s;
+        }
+
+        .two-column-grid .product-card:nth-child(2n+1) {
+            transition-delay: 0.2s;
         }
 
         .product-card {
@@ -1018,49 +1077,322 @@
             max-height: 90vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease-out;
+            position: relative;
         }
 
         .dark-mode .account-content {
             background-color: var(--card-dark);
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        /* Account Header */
+        .account-header {
+            padding: 25px 30px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 20px 20px 0 0;
+        }
+
+        .dark-mode .account-header {
+            border-bottom: 1px solid var(--border-dark);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+        }
+
+        .account-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+            font-family: 'Georgia', serif;
+        }
+
+        .account-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .account-close-btn {
+            color: #aaa;
+        }
+
+        .account-close-btn:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+            color: var(--primary-purple);
+        }
+
+        /* Updated Account Tabs - Colorful and Rounded */
+        .account-tabs-container {
+            padding: 20px 30px 0;
         }
 
         .account-tabs {
             display: flex;
-            border-bottom: 1px solid var(--border-light);
-            overflow-x: auto;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05));
+            padding: 10px;
+            border-radius: 15px;
         }
 
         .dark-mode .account-tabs {
-            border-bottom: 1px solid var(--border-dark);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
         }
 
         .account-tab {
             flex: 1;
-            padding: 15px;
-            background: none;
+            min-width: 150px;
+            padding: 15px 20px;
+            background: white;
             border: none;
             font-size: 16px;
             font-weight: 600;
             color: inherit;
             cursor: pointer;
             transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            min-width: 120px;
-            white-space: nowrap;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .account-tab {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .account-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .account-tab:hover::before {
+            left: 100%;
         }
 
         .account-tab.active {
-            color: var(--primary-purple);
-            border-bottom-color: var(--primary-purple);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
-        .account-tab:hover {
-            background-color: rgba(139, 92, 246, 0.1);
+        .account-tab[data-tab="profile"] {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+            color: var(--primary-purple);
+        }
+
+        .account-tab[data-tab="profile"].active {
+            background: linear-gradient(135deg, var(--primary-purple), #9B87F5);
+            color: white;
+        }
+
+        .account-tab[data-tab="security"] {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.05));
+            color: var(--teal);
+        }
+
+        .account-tab[data-tab="security"].active {
+            background: linear-gradient(135deg, var(--teal), #2DD4BF);
+            color: white;
+        }
+
+        .account-tab[data-tab="orders"] {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+            color: var(--orange);
+        }
+
+        .account-tab[data-tab="orders"].active {
+            background: linear-gradient(135deg, var(--orange), #FB923C);
+            color: white;
+        }
+
+        .account-tab[data-tab="wishlist"] {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.05));
+            color: var(--pink);
+        }
+
+        .account-tab[data-tab="wishlist"].active {
+            background: linear-gradient(135deg, var(--pink), #F472B6);
+            color: white;
+        }
+
+        .account-tab[data-tab="notifications"] {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+            color: var(--primary-blue);
+        }
+
+        .account-tab[data-tab="notifications"].active {
+            background: linear-gradient(135deg, var(--primary-blue), #60A5FA);
+            color: white;
+        }
+
+        .account-tab[data-tab="share"] {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            color: var(--warning);
+        }
+
+        .account-tab[data-tab="share"].active {
+            background: linear-gradient(135deg, var(--warning), #FBBF24);
+            color: white;
+        }
+
+        /* Mobile Toggle Buttons with Colorful Icons */
+        .mobile-toggles {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 15px;
+            margin: 20px;
+        }
+
+        .mobile-toggle-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: inherit;
+            position: relative;
+            min-height: 80px;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .mobile-toggle-btn {
+            background: rgba(26, 15, 46, 0.8);
+        }
+
+        .mobile-toggle-btn i {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .mobile-toggle-btn[data-tab="profile"] i {
+            color: var(--primary-purple);
+        }
+
+        .mobile-toggle-btn[data-tab="security"] i {
+            color: var(--teal);
+        }
+
+        .mobile-toggle-btn[data-tab="orders"] i {
+            color: var(--orange);
+        }
+
+        .mobile-toggle-btn[data-tab="wishlist"] i {
+            color: var(--pink);
+        }
+
+        .mobile-toggle-btn[data-tab="notifications"] i {
+            color: var(--primary-blue);
+        }
+
+        .mobile-toggle-btn[data-tab="share"] i {
+            color: var(--warning);
+        }
+
+        .mobile-toggle-btn .toggle-label {
+            font-size: 0.75rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .mobile-toggle-btn.active .toggle-label {
+            opacity: 1;
+            max-height: 20px;
+        }
+
+        .mobile-toggle-btn.active {
+            background: white;
+            border: 2px solid var(--primary-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+        }
+
+        .dark-mode .mobile-toggle-btn.active {
+            background: var(--primary-purple);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active i {
+            transform: scale(1.2);
+            color: inherit;
+        }
+
+        .mobile-toggle-btn.active[data-tab="profile"] {
+            background: linear-gradient(135deg, var(--primary-purple), #9B87F5);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active[data-tab="security"] {
+            background: linear-gradient(135deg, var(--teal), #2DD4BF);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active[data-tab="orders"] {
+            background: linear-gradient(135deg, var(--orange), #FB923C);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active[data-tab="wishlist"] {
+            background: linear-gradient(135deg, var(--pink), #F472B6);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active[data-tab="notifications"] {
+            background: linear-gradient(135deg, var(--primary-blue), #60A5FA);
+            color: white;
+        }
+
+        .mobile-toggle-btn.active[data-tab="share"] {
+            background: linear-gradient(135deg, var(--warning), #FBBF24);
+            color: white;
+        }
+
+        .mobile-toggle-btn .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: #EF4444;
+            color: white;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
         }
 
         .account-panel {
@@ -1095,6 +1427,7 @@
             font-weight: bold;
             overflow: hidden;
             cursor: pointer;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
         }
 
         .profile-picture img {
@@ -1177,7 +1510,7 @@
             cursor: pointer;
         }
 
-        /* Notifications Modal */
+        /* Fixed Notifications Modal */
         .notifications-modal {
             position: fixed;
             top: 0;
@@ -1245,10 +1578,12 @@
             padding: 20px;
             margin-bottom: 15px;
             transition: all 0.3s;
+            border: 1px solid var(--border-light);
         }
 
         .dark-mode .order-card {
             background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-dark);
         }
 
         .order-card:hover {
@@ -1472,8 +1807,8 @@
 
         /* Responsive Improvements */
         @media (max-width: 1200px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .two-column-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -1490,17 +1825,32 @@
                 padding: 60px 0;
             }
             
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-            }
-            
             .filters-container {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 768px) {
+            /* Hide wishlist and notification icons on mobile */
+            #wishlistBtn, #notificationsBtn {
+                display: none !important;
+            }
+            
+            /* Show mobile account tabs */
+            .mobile-toggles {
+                display: grid;
+            }
+            
+            /* Hide desktop account tabs */
+            .account-tabs {
+                display: none;
+            }
+            
+            /* Show badges on profile button */
+            .profile-btn .badge {
+                display: flex;
+            }
+            
             .header-content {
                 flex-wrap: wrap;
                 gap: 15px;
@@ -1550,11 +1900,6 @@
             .btn-primary, .btn-outline {
                 padding: 12px 24px;
                 min-width: 140px;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
             }
             
             .filters-container {
@@ -1614,6 +1959,39 @@
                 max-width: 300px;
                 justify-content: center;
             }
+            
+            /* Mobile Account Panels */
+            .account-panel {
+                padding: 20px;
+            }
+            
+            /* Account header mobile */
+            .account-header {
+                padding: 20px;
+            }
+            
+            .account-tabs-container {
+                padding: 15px 20px 0;
+            }
+            
+            /* Mobile toggles responsive grid */
+            .mobile-toggles {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .mobile-toggle-btn .toggle-label {
+                display: none;
+            }
+            
+            .mobile-toggle-btn.active .toggle-label {
+                display: block;
+            }
+
+            /* Fix mobile notifications position */
+            .notifications-modal {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1649,10 +2027,6 @@
                 font-size: 32px;
             }
             
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .order-footer {
                 flex-direction: column;
             }
@@ -1660,6 +2034,10 @@
             .order-footer .btn-outline,
             .order-footer .btn-primary {
                 width: 100%;
+            }
+            
+            .mobile-toggles {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -1834,6 +2212,341 @@
             background-color: #128C7E;
             transform: translateY(-2px);
         }
+        
+        /* Mobile Profile Badge */
+        .profile-badge-container {
+            position: relative;
+        }
+        
+        .profile-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #EF4444;
+            color: white;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        
+        /* Terms and Conditions */
+        .terms-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        .dark-mode .terms-container {
+            border-color: var(--border-dark);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .terms-container h4 {
+            color: var(--primary-purple);
+            margin-bottom: 10px;
+        }
+        
+        .terms-container p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .terms-container ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .terms-container li {
+            margin-bottom: 5px;
+        }
+        
+        /* Developer Contacts */
+        .developer-contacts {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .dark-mode .developer-contacts {
+            border-top-color: var(--border-dark);
+        }
+        
+        .developer-contacts h4 {
+            color: var(--primary-purple);
+            margin-bottom: 15px;
+        }
+        
+        .developer-card {
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .dark-mode .developer-card {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        /* Share Panel Styles */
+        .share-panel {
+            text-align: center;
+        }
+        
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .share-option:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--primary-purple);
+            transform: translateY(-3px);
+        }
+        
+        .share-option i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .share-option.whatsapp i {
+            color: #25D366;
+        }
+        
+        .share-option.facebook i {
+            color: #1877F2;
+        }
+        
+        .share-option.twitter i {
+            color: #1DA1F2;
+        }
+        
+        .share-option.email i {
+            color: var(--primary-purple);
+        }
+        
+        .share-option.copy i {
+            color: var(--orange);
+        }
+        
+        .share-link-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 10px;
+        }
+        
+        .share-link {
+            word-break: break-all;
+            font-size: 0.9rem;
+            color: var(--primary-purple);
+            margin-bottom: 10px;
+        }
+        
+        /* Order View Improvements */
+        .order-view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .order-view-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-light);
+            background: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .order-view-btn.active {
+            background: var(--primary-purple);
+            color: white;
+            border-color: var(--primary-purple);
+        }
+        
+        .dark-mode .order-view-btn {
+            border-color: var(--border-dark);
+        }
+        
+        /* Add these animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Touch improvements for mobile */
+        @media (max-width: 768px) {
+            button, 
+            .btn-primary, 
+            .btn-outline,
+            .action-btn,
+            .mobile-toggle-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .product-card {
+                touch-action: manipulation;
+            }
+            
+            /* Improve product grid spacing */
+            .two-column-grid {
+                gap: 12px;
+            }
+            
+            /* Better spacing for mobile */
+            .container {
+                padding: 0 12px;
+            }
+            
+            /* Account modal mobile improvements */
+            .account-content {
+                margin: 0;
+                border-radius: 0;
+                height: 100vh;
+                max-height: 100vh;
+            }
+            
+            /* Mobile toggle container */
+            .mobile-toggles {
+                display: grid;
+            }
+            
+            /* Toast notifications for mobile */
+            .notification-toast {
+                bottom: 80px !important;
+                top: auto !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: calc(100% - 20px) !important;
+                max-width: none !important;
+            }
+        }
+        
+        /* Safe area insets for modern phones */
+        @supports (padding: max(0px)) {
+            @media (max-width: 768px) {
+                .container {
+                    padding-left: max(12px, env(safe-area-inset-left));
+                    padding-right: max(12px, env(safe-area-inset-right));
+                }
+                
+                .whatsapp-btn {
+                    bottom: max(15px, env(safe-area-inset-bottom));
+                    right: max(15px, env(safe-area-inset-right));
+                }
+                
+                .cart-sidebar,
+                .notifications-modal,
+                .account-content {
+                    padding-bottom: env(safe-area-inset-bottom);
+                }
+            }
+        }
+        
+        /* Notification toast - fixed position */
+        .notification-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+            border-left: 4px solid #3B82F6;
+            max-width: calc(100vw - 40px);
+        }
+        
+        .dark-mode .notification-toast {
+            background: var(--card-dark);
+        }
+        
+        .notification-toast.success {
+            border-left-color: #10B981;
+        }
+        
+        .notification-toast.error {
+            border-left-color: #EF4444;
+        }
+        
+        .notification-toast.info {
+            border-left-color: #3B82F6;
+        }
+        
+        /* Order button styling */
+        .order-action-btn {
+            position: relative;
+        }
+        
+        /* Updated scroll reveal animation */
+        @keyframes revealFromBottom {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .scroll-reveal {
+            animation: revealFromBottom 0.6s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -1870,7 +2583,8 @@
                         <i class="fas fa-moon"></i>
                     </button>
 
-                    <button class="action-btn" id="wishlistBtn" onclick="openAccountModal('wishlist')">
+                    <!-- These icons will be hidden on mobile -->
+                    <button class="action-btn desktop-only" id="wishlistBtn" onclick="openAccountModal('wishlist')">
                         <i class="fas fa-heart"></i>
                         <span class="badge" id="wishlistBadge">0</span>
                     </button>
@@ -1880,13 +2594,17 @@
                         <span class="badge" id="cartBadge">0</span>
                     </button>
 
-                    <button class="action-btn" id="notificationsBtn">
+                    <button class="action-btn desktop-only" id="notificationsBtn" onclick="openNotificationsModal()">
                         <i class="fas fa-bell"></i>
                         <span class="badge" id="notificationBadge">0</span>
                     </button>
 
-                    <div class="profile-btn" id="profileBtn" onclick="openAccountModal()" title="My Account">
-                        <!-- Profile picture or initials will be inserted here -->
+                    <!-- Profile button with badges for mobile -->
+                    <div class="profile-badge-container">
+                        <div class="profile-btn" id="profileBtn" onclick="openAccountModal()" title="My Account">
+                            <!-- Profile picture or initials will be inserted here -->
+                        </div>
+                        <!-- Badges will be added here by JavaScript -->
                     </div>
 
                     <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -2026,7 +2744,8 @@
                         </div>
                     </div>
                     
-                    <div class="products-grid" id="featuredProducts">
+                    <!-- 2-Column Grid for Mobile -->
+                    <div class="two-column-grid" id="featuredProducts">
                         <!-- Featured products will be inserted here -->
                     </div>
                 </div>
@@ -2038,7 +2757,7 @@
                     <h2 class="section-title">Recommended For You</h2>
                     <p class="section-subtitle">Based on your preferences and trending items</p>
                     
-                    <div class="products-grid" id="recommendations">
+                    <div class="two-column-grid" id="recommendations">
                         <!-- Recommended products will be inserted here -->
                     </div>
                 </div>
@@ -2070,6 +2789,25 @@
                             <div id="qrCode"></div>
                             <p style="margin-top: 10px; font-size: 0.9rem;">Scan to visit LUMIÈRE</p>
                         </div>
+                        
+                        <!-- Developer Contacts -->
+                        <div class="developer-contacts">
+                            <h4>Developer Contacts</h4>
+                            <div class="developer-card">
+                                <p><strong>Darius</strong> - Full Stack Developer</p>
+                                <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; flex-wrap: wrap;">
+                                    <button class="btn-outline" onclick="contactDeveloper('whatsapp')" style="padding: 8px 16px; font-size: 0.9rem;">
+                                        <i class="fab fa-whatsapp"></i> WhatsApp
+                                    </button>
+                                    <button class="btn-outline" onclick="contactDeveloper('email')" style="padding: 8px 16px; font-size: 0.9rem;">
+                                        <i class="fas fa-envelope"></i> Email
+                                    </button>
+                                    <button class="btn-outline" onclick="contactDeveloper('github')" style="padding: 8px 16px; font-size: 0.9rem;">
+                                        <i class="fab fa-github"></i> GitHub
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2082,7 +2820,7 @@
                     <h2 class="section-title">Fine Jewelry Collection</h2>
                     <p class="section-subtitle">Exquisite pieces crafted with precision and timeless elegance</p>
                     
-                    <div class="products-grid" id="jewelryProducts">
+                    <div class="two-column-grid" id="jewelryProducts">
                         <!-- Jewelry products will be inserted here -->
                     </div>
                 </div>
@@ -2096,7 +2834,7 @@
                     <h2 class="section-title">Luxury Beauty Collection</h2>
                     <p class="section-subtitle">Premium skincare and beauty essentials for radiant skin</p>
                     
-                    <div class="products-grid" id="beautyProducts">
+                    <div class="two-column-grid" id="beautyProducts">
                         <!-- Beauty products will be inserted here -->
                     </div>
                 </div>
@@ -2254,14 +2992,70 @@
     <!-- Account Modal -->
     <div class="account-modal" id="accountModal">
         <div class="account-content">
-            <div class="account-tabs">
-                <button class="account-tab active" data-tab="profile">Profile</button>
-                <button class="account-tab" data-tab="security">Security</button>
-                <button class="account-tab" data-tab="orders">Orders</button>
-                <button class="account-tab" data-tab="wishlist">Wishlist</button>
-                <button class="account-tab" data-tab="notifications">Notifications</button>
+            <!-- Account Header -->
+            <div class="account-header">
+                <h2>My Account</h2>
+                <button class="account-close-btn" onclick="closeAccountModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
+            <!-- Desktop Tabs with Icons -->
+            <div class="account-tabs-container">
+                <div class="account-tabs">
+                    <button class="account-tab active" data-tab="profile">
+                        <i class="fas fa-user"></i> Profile
+                    </button>
+                    <button class="account-tab" data-tab="security">
+                        <i class="fas fa-lock"></i> Security
+                    </button>
+                    <button class="account-tab" data-tab="orders">
+                        <i class="fas fa-shopping-bag"></i> Orders
+                    </button>
+                    <button class="account-tab" data-tab="wishlist">
+                        <i class="fas fa-heart"></i> Wishlist
+                    </button>
+                    <button class="account-tab" data-tab="notifications">
+                        <i class="fas fa-bell"></i> Notifications
+                    </button>
+                    <button class="account-tab" data-tab="share">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Toggle Buttons with Icons -->
+            <div class="mobile-toggles" id="mobileToggles">
+                <button class="mobile-toggle-btn active" data-tab="profile">
+                    <i class="fas fa-user"></i>
+                    <span class="toggle-label">Profile</span>
+                </button>
+                <button class="mobile-toggle-btn" data-tab="security">
+                    <i class="fas fa-lock"></i>
+                    <span class="toggle-label">Security</span>
+                </button>
+                <button class="mobile-toggle-btn" data-tab="orders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="toggle-label">Orders</span>
+                    <span class="badge" id="mobileOrdersBadge" style="display: none;">0</span>
+                </button>
+                <button class="mobile-toggle-btn" data-tab="wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="toggle-label">Wishlist</span>
+                    <span class="badge" id="mobileWishlistBadge" style="display: none;">0</span>
+                </button>
+                <button class="mobile-toggle-btn" data-tab="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="toggle-label">Notifications</span>
+                    <span class="badge" id="mobileNotificationsBadge" style="display: none;">0</span>
+                </button>
+                <button class="mobile-toggle-btn" data-tab="share">
+                    <i class="fas fa-share-alt"></i>
+                    <span class="toggle-label">Share</span>
+                </button>
+            </div>
+            
+            <!-- Profile Panel -->
             <div class="account-panel active" id="profilePanel">
                 <div class="profile-header">
                     <div class="profile-picture" id="profilePicture">
@@ -2299,6 +3093,30 @@
                         <textarea class="form-control" id="profileAddress" rows="3" required></textarea>
                     </div>
                     
+                    <!-- Terms Acceptance for New Users -->
+                    <div id="termsAcceptanceSection" style="display: none;">
+                        <div class="terms-container">
+                            <h4>Terms and Conditions</h4>
+                            <p>By creating an account and placing your first order, you agree to:</p>
+                            <ul>
+                                <li>Provide accurate and complete information</li>
+                                <li>Accept our shipping and return policies</li>
+                                <li>Agree to receive order updates and promotional communications</li>
+                                <li>Accept our privacy policy regarding data handling</li>
+                                <li>Acknowledge that all products are subject to availability</li>
+                                <li>Accept our payment terms and conditions</li>
+                            </ul>
+                            <p><strong>Last updated: December 2024</strong></p>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label style="display: flex; align-items: flex-start; gap: 10px; font-weight: normal;">
+                                <input type="checkbox" id="acceptTerms" style="margin-top: 3px;">
+                                <span>I have read and agree to the Terms and Conditions</span>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div style="display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap;">
                         <button type="submit" class="btn-primary">Save Changes</button>
                         <button type="button" class="btn-outline" onclick="closeAccountModal()">Cancel</button>
@@ -2306,6 +3124,7 @@
                 </form>
             </div>
             
+            <!-- Security Panel -->
             <div class="account-panel" id="securityPanel">
                 <h3 style="margin-bottom: 20px;">Security Settings</h3>
                 <form id="securityForm">
@@ -2347,27 +3166,45 @@
                 </form>
             </div>
             
+            <!-- Orders Panel -->
             <div class="account-panel" id="ordersPanel">
-                <h3 style="margin-bottom: 20px;">Order History</h3>
-                
-                <!-- Uncompleted Orders (Cart Items) -->
-                <div id="uncompletedOrdersSection">
-                    <!-- Will be populated with cart items -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h3>Order History</h3>
+                    <div class="order-view-toggle">
+                        <button class="order-view-btn active" onclick="showOrdersView('current')">Current Cart</button>
+                        <button class="order-view-btn" onclick="showOrdersView('completed')">Completed Orders</button>
+                    </div>
                 </div>
                 
-                <!-- Completed Orders -->
-                <div id="completedOrdersSection">
-                    <!-- Will be populated with completed orders -->
+                <!-- Current Cart Items View -->
+                <div id="currentCartView" class="orders-view">
+                    <div id="uncompletedOrdersSection">
+                        <!-- Will be populated with cart items -->
+                    </div>
+                </div>
+                
+                <!-- Completed Orders View -->
+                <div id="completedOrdersView" class="orders-view" style="display: none;">
+                    <div id="completedOrdersSection">
+                        <!-- Will be populated with completed orders -->
+                    </div>
                 </div>
             </div>
             
+            <!-- Wishlist Panel -->
             <div class="account-panel" id="wishlistPanel">
-                <h3 style="margin-bottom: 20px;">My Wishlist</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h3>My Wishlist</h3>
+                    <button class="btn-outline" onclick="clearWishlist()" style="padding: 8px 16px; font-size: 0.9rem;">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
                 <div class="wishlist-grid" id="wishlistItems">
                     <!-- Wishlist items will be inserted here -->
                 </div>
             </div>
             
+            <!-- Notifications Panel -->
             <div class="account-panel" id="notificationsPanel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <h3>Notifications</h3>
@@ -2382,6 +3219,50 @@
                 </div>
                 <div id="notificationsListPanel">
                     <!-- Notifications will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Share Panel -->
+            <div class="account-panel" id="sharePanel">
+                <div class="share-panel">
+                    <h3 style="margin-bottom: 15px;">Share LUMIÈRE</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.8;">Share our luxury store with friends and family</p>
+                    
+                    <div class="share-options">
+                        <div class="share-option whatsapp" onclick="shareViaWhatsApp()">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>WhatsApp</span>
+                        </div>
+                        <div class="share-option facebook" onclick="shareViaFacebook()">
+                            <i class="fab fa-facebook"></i>
+                            <span>Facebook</span>
+                        </div>
+                        <div class="share-option twitter" onclick="shareViaTwitter()">
+                            <i class="fab fa-twitter"></i>
+                            <span>Twitter</span>
+                        </div>
+                        <div class="share-option email" onclick="shareViaEmail()">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </div>
+                        <div class="share-option copy" onclick="copyAccountShareLink()">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy Link</span>
+                        </div>
+                    </div>
+                    
+                    <div class="share-link-container">
+                        <div class="share-link" id="accountShareLink">https://darius2322.github.io/gem-/</div>
+                        <button class="btn-primary" onclick="copyAccountShareLink()" style="width: 100%;">
+                            <i class="fas fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4 style="margin-bottom: 15px;">Share QR Code</h4>
+                        <div id="accountQRCode" style="margin: 0 auto; width: 150px; height: 150px;"></div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">Scan to visit LUMIÈRE</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2438,7 +3319,7 @@
     </footer>
 
     <script>
-        // Data
+        // Extended Products Data with 24 products
         const products = [
             {
                 id: 1,
@@ -2502,243 +3383,303 @@
             },
             {
                 id: 5,
-                name: "Gold Hoop Earrings",
-                price: 19900,
+                name: "Sapphire Tennis Bracelet",
+                price: 185000,
                 category: "jewelry",
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.6,
-                reviews: 74,
-                description: "Classic 14k gold hoop earrings in three sizes. Timeless design for everyday elegance.",
-                details: ["14k solid gold", "Three sizes available", "Hinged closure", "Hypoallergenic", "Water-resistant", "1-year warranty"],
-                material: "14k Solid Gold",
+                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=400",
+                rating: 4.8,
+                reviews: 67,
+                description: "Stunning blue sapphire tennis bracelet set in platinum. A timeless piece for any occasion.",
+                details: ["Natural sapphires", "Platinum setting", "7 inches length", "Secure clasp", "Gemstone certificate", "Lifetime warranty"],
+                material: "Platinum & Sapphires",
                 availability: "In Stock",
-                featured: false,
-                tags: ["hoops", "earrings", "gold"]
+                featured: true,
+                tags: ["bracelet", "sapphire", "platinum"]
             },
             {
                 id: 6,
-                name: "Vitamin C Brightening Mask",
-                price: 4200,
+                name: "Vitamin C Brightening Cream",
+                price: 7200,
                 category: "beauty",
-                image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
-                rating: 4.8,
-                reviews: 112,
-                description: "Weekly treatment mask with 20% vitamin C. Brightens, evens skin tone, and reduces dark spots.",
-                details: ["5 sheet masks", "20% vitamin C", "Aloe vera base", "Paraben-free", "Instant results", "Weekly use"],
-                material: "Vitamin C & Aloe Vera",
+                image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400",
+                rating: 4.7,
+                reviews: 142,
+                description: "Brightening cream with 20% vitamin C for radiant, even-toned skin. Reduces dark spots.",
+                details: ["50ml jar", "20% Vitamin C", "SPF 30", "Lightweight formula", "Non-greasy", "Suitable for all skin types"],
+                material: "Vitamin C & Antioxidants",
                 availability: "In Stock",
                 featured: false,
-                tags: ["mask", "brightening", "vitamin c"]
+                tags: ["brightening", "vitamin c", "cream"]
             },
             {
                 id: 7,
-                name: "Emerald Tennis Bracelet",
-                price: 58900,
+                name: "Emerald Cut Earrings",
+                price: 95000,
                 category: "jewelry",
-                image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400",
-                rating: 4.8,
-                reviews: 67,
-                description: "Stunning emerald tennis bracelet set in 18k yellow gold. Perfect for formal events.",
-                details: ["3 carat total weight", "18k yellow gold", "Emerald stones", "Adjustable length", "Secure clasp", "Professional cleaning kit included"],
-                material: "18k Gold & Emeralds",
+                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400",
+                rating: 4.9,
+                reviews: 94,
+                description: "Elegant emerald cut diamond earrings in yellow gold. Perfect for special occasions.",
+                details: ["1 carat total", "Emerald cut diamonds", "18k yellow gold", "Secure backs", "Gift box included", "Insurance available"],
+                material: "18k Gold & Diamonds",
                 availability: "Limited Stock",
                 featured: true,
-                tags: ["bracelet", "emerald", "tennis"]
+                tags: ["earrings", "emerald", "diamond"]
             },
             {
                 id: 8,
-                name: "24K Gold Facial Serum",
-                price: 12500,
+                name: "Anti-Pollution Serum",
+                price: 9800,
                 category: "beauty",
-                image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=400",
-                rating: 4.9,
-                reviews: 189,
-                description: "Premium facial serum infused with 24K gold particles for ultimate skin rejuvenation.",
-                details: ["Contains 24K gold", "Anti-aging properties", "Skin brightening", "30ml bottle", "Dermatologically tested", "Results in 2 weeks"],
-                material: "24K Gold & Botanical Extracts",
+                image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
+                rating: 4.6,
+                reviews: 87,
+                description: "Protective serum that shields skin from pollution and environmental damage.",
+                details: ["30ml bottle", "Anti-pollution complex", "Lightweight texture", "Fast absorbing", "Daily use", "Lasts 2 months"],
+                material: "Antioxidants & Protective Complex",
                 availability: "In Stock",
-                featured: true,
-                tags: ["gold", "serum", "luxury"]
+                featured: false,
+                tags: ["serum", "protection", "anti-pollution"]
             },
             {
                 id: 9,
-                name: "Sapphire Pendant",
-                price: 32900,
+                name: "Rose Gold Bangle",
+                price: 45000,
                 category: "jewelry",
                 image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400",
-                rating: 4.7,
-                reviews: 92,
-                description: "Elegant blue sapphire pendant on a delicate gold chain. A timeless statement piece.",
-                details: ["2 carat sapphire", "18k white gold chain", "Adjustable length", "Birthstone option available", "Gift box included", "1-year warranty"],
-                material: "Sapphire & 18k Gold",
+                rating: 4.5,
+                reviews: 112,
+                description: "Elegant rose gold bangle with diamond accents. Adjustable for perfect fit.",
+                details: ["18k rose gold", "Diamond accents", "Adjustable size", "Italian craftsmanship", "Gift packaging", "1-year warranty"],
+                material: "Rose Gold & Diamonds",
                 availability: "In Stock",
                 featured: false,
-                tags: ["pendant", "sapphire", "necklace"]
+                tags: ["bangle", "rose gold", "adjustable"]
             },
             {
                 id: 10,
-                name: "Luxury Perfume Collection",
-                price: 18900,
+                name: "Retinol Night Treatment",
+                price: 11500,
                 category: "beauty",
-                image: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=400",
-                rating: 4.9,
-                reviews: 245,
-                description: "Exclusive fragrance collection with notes of jasmine, sandalwood, and vanilla.",
-                details: ["3-piece set", "Eau de Parfum", "100ml each", "Long-lasting scent", "Elegant packaging", "Unisex fragrance"],
-                material: "Premium Fragrance Oils",
+                image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400",
+                rating: 4.8,
+                reviews: 203,
+                description: "Advanced retinol treatment for overnight skin renewal and wrinkle reduction.",
+                details: ["30ml bottle", "Encapsulated retinol", "Gentle formula", "Results in 4 weeks", "Clinical grade", "Prescription strength"],
+                material: "Retinol & Peptides",
                 availability: "In Stock",
-                featured: false,
-                tags: ["perfume", "fragrance", "collection"]
+                featured: true,
+                tags: ["retinol", "anti-aging", "treatment"]
             },
             {
                 id: 11,
-                name: "Diamond Stud Earrings",
-                price: 42900,
+                name: "Diamond Pendant Necklace",
+                price: 75000,
                 category: "jewelry",
                 image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.8,
+                rating: 4.7,
                 reviews: 156,
-                description: "Classic diamond stud earrings with secure screw-back setting for daily wear.",
-                details: ["1 carat total weight", "VS2 clarity", "Brilliant cut", "Platinum setting", "Secure screw-back", "Certificate included"],
-                material: "Diamonds & Platinum",
+                description: "Delicate diamond pendant on a fine chain. Perfect for everyday elegance.",
+                details: ["0.5 carat diamond", "18k white gold", "Adjustable chain", "Secure clasp", "Velvet pouch", "Lifetime polish"],
+                material: "White Gold & Diamond",
                 availability: "In Stock",
-                featured: true,
-                tags: ["studs", "diamond", "earrings"]
+                featured: false,
+                tags: ["pendant", "necklace", "diamond"]
             },
             {
                 id: 12,
-                name: "Anti-Aging Eye Cream",
-                price: 7800,
+                name: "Hyaluronic Acid Booster",
+                price: 8500,
                 category: "beauty",
                 image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
-                rating: 4.7,
-                reviews: 134,
-                description: "Advanced eye cream that reduces puffiness, dark circles, and fine lines.",
-                details: ["15ml jar", "Caffeine & retinol", "Cooling applicator", "Visible results in 4 weeks", "Suitable for sensitive skin", "Morning & night use"],
-                material: "Caffeine & Retinol",
+                rating: 4.9,
+                reviews: 189,
+                description: "Intense hydration booster with 5 types of hyaluronic acid for plump, dewy skin.",
+                details: ["15ml concentrate", "5 HA types", "Molecular weights", "Oil-free", "Suitable for all skin", "Instant results"],
+                material: "Hyaluronic Acid Complex",
                 availability: "In Stock",
-                featured: false,
-                tags: ["eye cream", "anti-aging", "cream"]
+                featured: true,
+                tags: ["hydrating", "booster", "plumping"]
             },
             {
                 id: 13,
-                name: "Rose Gold Bangle Set",
-                price: 28900,
+                name: "Ruby Stud Earrings",
+                price: 68000,
                 category: "jewelry",
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.7,
-                reviews: 89,
-                description: "Set of three rose gold bangles with intricate designs. Perfect for layering.",
-                details: ["14k rose gold", "Three bangles", "Adjustable fit", "Hypoallergenic", "Gift box included", "6-month warranty"],
-                material: "14k Rose Gold",
-                availability: "In Stock",
-                featured: true,
-                tags: ["bangle", "rose gold", "set"]
+                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400",
+                rating: 4.6,
+                reviews: 78,
+                description: "Classic ruby stud earrings in yellow gold. Timeless elegance for any occasion.",
+                details: ["Natural rubies", "18k yellow gold", "Secure screw backs", "Gift box", "Gem certificate", "30-day return"],
+                material: "Gold & Rubies",
+                availability: "Limited Stock",
+                featured: false,
+                tags: ["ruby", "studs", "classic"]
             },
             {
                 id: 14,
-                name: "Luxury Lipstick Set",
-                price: 8900,
+                name: "Brightening Eye Cream",
+                price: 9500,
+                category: "beauty",
+                image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400",
+                rating: 4.7,
+                reviews: 134,
+                description: "Targeted eye cream that reduces dark circles and puffiness for brighter eyes.",
+                details: ["15ml jar", "Caffeine & vitamin K", "Cooling applicator", "Fragrance-free", "Morning & night use", "4-week results"],
+                material: "Caffeine & Vitamin K",
+                availability: "In Stock",
+                featured: false,
+                tags: ["eye cream", "brightening", "caffeine"]
+            },
+            {
+                id: 15,
+                name: "Gold Chain Bracelet",
+                price: 32000,
+                category: "jewelry",
+                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=400",
+                rating: 4.4,
+                reviews: 203,
+                description: "Minimalist gold chain bracelet with secure clasp. Perfect for stacking or wearing alone.",
+                details: ["14k gold", "Adjustable length", "Lobster clasp", "Italian made", "Tarnish resistant", "Everyday wear"],
+                material: "14k Gold",
+                availability: "In Stock",
+                featured: false,
+                tags: ["chain", "bracelet", "minimalist"]
+            },
+            {
+                id: 16,
+                name: "AHA/BHA Exfoliating Toner",
+                price: 7800,
                 category: "beauty",
                 image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
                 rating: 4.8,
                 reviews: 167,
-                description: "Set of 6 premium lipsticks in classic shades. Long-lasting and moisturizing.",
-                details: ["6 lipsticks", "Classic shades", "Matte finish", "Moisturizing formula", "Cruelty-free", "Lasts 8 hours"],
-                material: "Premium Lipstick Formula",
+                description: "Chemical exfoliant that gently removes dead skin cells for smoother, brighter complexion.",
+                details: ["150ml bottle", "AHA/BHA blend", "pH balanced", "Alcohol-free", "2-3 times weekly", "Visible results"],
+                material: "AHA & BHA Acids",
                 availability: "In Stock",
-                featured: false,
-                tags: ["lipstick", "makeup", "set"]
-            },
-            {
-                id: 15,
-                name: "Diamond Eternity Ring",
-                price: 45900,
-                category: "jewelry",
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.9,
-                reviews: 112,
-                description: "Elegant eternity ring with channel-set diamonds. Symbol of eternal love.",
-                details: ["18k white gold", "Channel-set diamonds", "Half eternity", "Available in sizes 4-9", "Professional cleaning", "Lifetime warranty"],
-                material: "18k Gold & Diamonds",
-                availability: "Limited Stock",
                 featured: true,
-                tags: ["eternity", "diamond", "ring"]
-            },
-            {
-                id: 16,
-                name: "Luxury Face Oil",
-                price: 11500,
-                category: "beauty",
-                image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
-                rating: 4.9,
-                reviews: 203,
-                description: "Nourishing face oil with rosehip and jojoba oils for radiant, glowing skin.",
-                details: ["30ml bottle", "Rosehip oil", "Jojoba oil", "Vitamin E", "Cold-pressed", "Cruelty-free"],
-                material: "Rosehip & Jojoba Oils",
-                availability: "In Stock",
-                featured: false,
-                tags: ["face oil", "radiant", "nourishing"]
+                tags: ["exfoliant", "toner", "chemical peel"]
             },
             {
                 id: 17,
-                name: "Silver Charm Bracelet",
-                price: 15900,
+                name: "Diamond Hoop Earrings",
+                price: 125000,
                 category: "jewelry",
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.6,
-                reviews: 78,
-                description: "Sterling silver charm bracelet with personalized charms. Add meaning to your style.",
-                details: ["Sterling silver", "5 charms included", "Adjustable length", "Personalization available", "Anti-tarnish", "1-year warranty"],
-                material: "Sterling Silver",
-                availability: "In Stock",
-                featured: false,
-                tags: ["charm", "silver", "bracelet"]
+                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400",
+                rating: 4.9,
+                reviews: 89,
+                description: "Luxurious diamond hoop earrings that make a statement. Perfect for evening events.",
+                details: ["2 carat total", "Full-cut diamonds", "18k white gold", "French wire", "Insurance value", "Signature collection"],
+                material: "White Gold & Diamonds",
+                availability: "Limited Stock",
+                featured: true,
+                tags: ["hoops", "diamond", "statement"]
             },
             {
                 id: 18,
-                name: "Makeup Brush Set",
-                price: 12900,
+                name: "Ceramide Moisture Barrier",
+                price: 10500,
                 category: "beauty",
-                image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
-                rating: 4.8,
-                reviews: 145,
-                description: "Professional 12-piece makeup brush set for flawless application.",
-                details: ["12 brushes", "Synthetic bristles", "Rose gold handles", "Travel case", "Easy to clean", "Professional quality"],
-                material: "Synthetic Bristles & Rose Gold",
+                image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400",
+                rating: 4.7,
+                reviews: 156,
+                description: "Repairs skin barrier with ceramides and fatty acids for healthy, resilient skin.",
+                details: ["50ml cream", "3:1:1 ceramide ratio", "Cholesterol & fatty acids", "Non-comedogenic", "Clinically tested", "For sensitive skin"],
+                material: "Ceramides & Lipids",
                 availability: "In Stock",
-                featured: true,
-                tags: ["brushes", "makeup", "set"]
+                featured: false,
+                tags: ["moisture", "barrier", "ceramide"]
             },
             {
                 id: 19,
-                name: "Ruby Stud Earrings",
-                price: 37900,
+                name: "Pearl Drop Earrings",
+                price: 42000,
                 category: "jewelry",
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
-                rating: 4.7,
-                reviews: 67,
-                description: "Exquisite ruby stud earrings set in 18k yellow gold. Classic elegance.",
-                details: ["Natural rubies", "18k yellow gold", "Secure screw-back", "Birthstone option", "Certificate included", "2-year warranty"],
-                material: "Rubies & 18k Gold",
-                availability: "Limited Stock",
+                image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400",
+                rating: 4.6,
+                reviews: 94,
+                description: "Elegant pearl drop earrings with diamond accents. Timeless feminine style.",
+                details: ["South Sea pearls", "Diamond accents", "18k gold posts", "Secure backs", "Velvet box", "Pearl care guide"],
+                material: "Pearls & Diamonds",
+                availability: "In Stock",
                 featured: false,
-                tags: ["ruby", "studs", "earrings"]
+                tags: ["pearl", "drop", "earrings"]
             },
             {
                 id: 20,
-                name: "Luxury Body Lotion",
-                price: 6800,
+                name: "Niacinamide Serum",
+                price: 9200,
                 category: "beauty",
                 image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
                 rating: 4.8,
-                reviews: 189,
-                description: "Silky body lotion with shea butter and almond oil for 24-hour hydration.",
-                details: ["500ml bottle", "Shea butter", "Almond oil", "Fast absorbing", "Light fragrance", "Cruelty-free"],
-                material: "Shea Butter & Almond Oil",
+                reviews: 245,
+                description: "10% niacinamide serum for pore refinement, oil control, and even skin tone.",
+                details: ["30ml dropper", "10% niacinamide", "Zinc PCA", "Oil-free", "Fast absorbing", "Results in 4 weeks"],
+                material: "Niacinamide & Zinc",
+                availability: "In Stock",
+                featured: true,
+                tags: ["niacinamide", "serum", "pore refining"]
+            },
+            {
+                id: 21,
+                name: "Tennis Necklace",
+                price: 285000,
+                category: "jewelry",
+                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400",
+                rating: 4.9,
+                reviews: 45,
+                description: "Luxurious tennis necklace with graduating diamonds. The ultimate statement piece.",
+                details: ["10 carat total", "Graduating diamonds", "Platinum setting", "Secure double clasp", "Insurance appraisal", "Custom length"],
+                material: "Platinum & Diamonds",
+                availability: "Made to Order",
+                featured: true,
+                tags: ["tennis", "necklace", "statement"]
+            },
+            {
+                id: 22,
+                name: "Vitamin E Oil",
+                price: 6800,
+                category: "beauty",
+                image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400",
+                rating: 4.5,
+                reviews: 178,
+                description: "Pure vitamin E oil for intense nourishment and antioxidant protection.",
+                details: ["30ml bottle", "100% vitamin E", "Cold pressed", "Multi-purpose", "For face & body", "Non-greasy"],
+                material: "Pure Vitamin E",
                 availability: "In Stock",
                 featured: false,
-                tags: ["body lotion", "moisturizing", "hydrating"]
+                tags: ["vitamin e", "oil", "nourishing"]
+            },
+            {
+                id: 23,
+                name: "Stacking Rings Set",
+                price: 38000,
+                category: "jewelry",
+                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400",
+                rating: 4.7,
+                reviews: 167,
+                description: "Set of three delicate stacking rings in mixed metals. Create your own combination.",
+                details: ["Set of 3 rings", "Mixed metals", "Adjustable sizes", "Stack or wear alone", "Gift packaging", "Modern design"],
+                material: "Gold, Rose Gold & Silver",
+                availability: "In Stock",
+                featured: false,
+                tags: ["stacking", "rings", "set"]
+            },
+            {
+                id: 24,
+                name: "SPF 50 Sunscreen",
+                price: 7500,
+                category: "beauty",
+                image: "https://images.unsplash.com/photo-1556228578-9c360e1d458e?auto=format&fit=crop&w=400",
+                rating: 4.9,
+                reviews: 312,
+                description: "Broad spectrum sunscreen with SPF 50 for complete UVA/UVB protection.",
+                details: ["50ml tube", "SPF 50 PA++++", "Water resistant", "Non-white cast", "For face & body", "Dermatologist tested"],
+                material: "Zinc Oxide & Filters",
+                availability: "In Stock",
+                featured: true,
+                tags: ["sunscreen", "spf", "protection"]
             }
         ];
 
@@ -2754,7 +3695,9 @@
             address: "Nairobi, Kenya",
             password: "",
             profilePicture: null,
-            memberSince: new Date().toISOString()
+            memberSince: new Date().toISOString(),
+            acceptedTerms: false,
+            isNewUser: true
         };
         let activeSection = 'home';
         let currentFilters = {
@@ -2764,6 +3707,7 @@
             maxPrice: null
         };
         const SLOGAN = "Where Beauty Meets Brilliance";
+        const SHARE_LINK = "https://darius2322.github.io/gem-/";
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -2774,6 +3718,15 @@
             updateProfilePicture();
             generateQRCode();
             generateRecommendations();
+            generateAccountQRCode();
+            
+            // Initialize scroll reveal
+            initScrollReveal();
+            
+            // Show terms for new users
+            if (userProfile.isNewUser) {
+                showTermsAcceptance();
+            }
             
             if (!localStorage.getItem('lumiereFirstVisit')) {
                 addNotification('Welcome to LUMIÈRE! Enjoy your shopping experience.', 'info');
@@ -2810,6 +3763,7 @@
             document.getElementById('profileEmail').value = userProfile.email;
             document.getElementById('profilePhone').value = userProfile.phone;
             document.getElementById('profileAddress').value = userProfile.address;
+            document.getElementById('accountShareLink').textContent = SHARE_LINK;
             
             updateProfileDisplay();
         }
@@ -2851,6 +3805,7 @@
             updateCartBadge();
             updateWishlistBadge();
             updateNotificationBadge();
+            updateMobileProfileBadges();
         }
 
         // Update cart badge
@@ -2896,6 +3851,55 @@
             }
         }
 
+        // Update mobile profile badges
+        function updateMobileProfileBadges() {
+            const totalUnread = notifications.filter(n => !n.read).length;
+            const wishlistCount = wishlist.length;
+            const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+            
+            // Update profile button badge
+            const totalBadges = totalUnread + wishlistCount;
+            const profileBadgeContainer = document.querySelector('.profile-badge-container');
+            
+            // Remove existing badges
+            const existingBadges = profileBadgeContainer.querySelectorAll('.profile-badge');
+            existingBadges.forEach(badge => badge.remove());
+            
+            // Add badges if needed
+            if (totalBadges > 0) {
+                const badge = document.createElement('div');
+                badge.className = 'profile-badge';
+                badge.textContent = totalBadges > 9 ? '9+' : totalBadges;
+                profileBadgeContainer.appendChild(badge);
+            }
+            
+            // Update mobile toggle badges
+            const mobileWishlistBadge = document.getElementById('mobileWishlistBadge');
+            const mobileNotificationsBadge = document.getElementById('mobileNotificationsBadge');
+            const mobileOrdersBadge = document.getElementById('mobileOrdersBadge');
+            
+            if (wishlistCount > 0) {
+                mobileWishlistBadge.textContent = wishlistCount;
+                mobileWishlistBadge.style.display = 'inline-flex';
+            } else {
+                mobileWishlistBadge.style.display = 'none';
+            }
+            
+            if (totalUnread > 0) {
+                mobileNotificationsBadge.textContent = totalUnread;
+                mobileNotificationsBadge.style.display = 'inline-flex';
+            } else {
+                mobileNotificationsBadge.style.display = 'none';
+            }
+            
+            if (cartCount > 0) {
+                mobileOrdersBadge.textContent = cartCount;
+                mobileOrdersBadge.style.display = 'inline-flex';
+            } else {
+                mobileOrdersBadge.style.display = 'none';
+            }
+        }
+
         // Update cart total
         function updateCartTotal() {
             let total = 0;
@@ -2935,6 +3939,14 @@
             document.getElementById('profileMemberSince').textContent = `Member since: ${formatDate(userProfile.memberSince)}`;
         }
 
+        // Show terms acceptance for new users
+        function showTermsAcceptance() {
+            const termsSection = document.getElementById('termsAcceptanceSection');
+            if (termsSection && userProfile.isNewUser && !userProfile.acceptedTerms) {
+                termsSection.style.display = 'block';
+            }
+        }
+
         // Add notification
         function addNotification(message, type = 'info') {
             const notification = {
@@ -2949,32 +3961,16 @@
             if (notifications.length > 50) notifications.length = 50;
             
             updateNotificationBadge();
+            updateMobileProfileBadges();
             saveToLocalStorage();
             
             showToastNotification(notification);
         }
 
-        // Show toast notification
+        // Show toast notification - Fixed position (top right)
         function showToastNotification(notification) {
             const toast = document.createElement('div');
-            toast.className = `notification-item ${notification.type} ${notification.read ? '' : 'unread'}`;
-            toast.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                width: min(300px, 90vw);
-                background: white;
-                border-radius: 10px;
-                padding: 15px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                z-index: 10000;
-                animation: slideInRight 0.3s ease-out;
-                border-left: 4px solid ${notification.type === 'success' ? '#10B981' : notification.type === 'error' ? '#EF4444' : '#3B82F6'};
-            `;
-            
-            if (document.body.classList.contains('dark-mode')) {
-                toast.style.background = 'var(--card-dark)';
-            }
+            toast.className = `notification-toast ${notification.type}`;
             
             toast.innerHTML = `
                 <div style="font-weight: 600; margin-bottom: 5px;">${notification.message}</div>
@@ -2996,6 +3992,7 @@
         function addToCart(productId) {
             cart[productId] = (cart[productId] || 0) + 1;
             updateCartBadge();
+            updateMobileProfileBadges();
             renderCartItems();
             renderUncompletedOrders();
             
@@ -3017,6 +4014,7 @@
                 delete cart[productId];
             }
             updateCartBadge();
+            updateMobileProfileBadges();
             renderCartItems();
             renderUncompletedOrders();
             saveToLocalStorage();
@@ -3034,9 +4032,24 @@
             }
             
             updateWishlistBadge();
+            updateMobileProfileBadges();
             renderAllProducts();
             generateRecommendations();
             saveToLocalStorage();
+        }
+
+        // Clear wishlist
+        function clearWishlist() {
+            if (wishlist.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear your wishlist?')) {
+                wishlist = [];
+                updateWishlistBadge();
+                updateMobileProfileBadges();
+                renderAllProducts();
+                saveToLocalStorage();
+                addNotification('Wishlist cleared', 'success');
+            }
         }
 
         // Check if product is in wishlist
@@ -3116,7 +4129,7 @@
             return filtered;
         }
 
-        // Render cart items - FIXED
+        // Render cart items
         function renderCartItems() {
             const container = document.getElementById('cartItems');
             if (!container) return;
@@ -3167,7 +4180,7 @@
             }
         }
 
-        // Render filtered products
+        // Render filtered products with scroll reveal
         function renderFilteredProducts() {
             const featuredContainer = document.getElementById('featuredProducts');
             const jewelryContainer = document.getElementById('jewelryProducts');
@@ -3192,7 +4205,7 @@
             }
         }
 
-        // Render products to container
+        // Render products to container with scroll reveal
         function renderProductsToContainer(container, productList, type = 'featured') {
             container.innerHTML = '';
             
@@ -3209,10 +4222,13 @@
                 return;
             }
             
-            productList.forEach(product => {
-                const productCard = createProductCard(product);
+            productList.forEach((product, index) => {
+                const productCard = createProductCard(product, index);
                 container.appendChild(productCard);
             });
+            
+            // Initialize scroll reveal for new products
+            setTimeout(() => initScrollReveal(), 100);
         }
 
         // Render all products
@@ -3221,10 +4237,11 @@
             renderWishlist();
         }
 
-        // Create product card - REMOVED RECOMMENDED TAG
-        function createProductCard(product) {
+        // Create product card with scroll reveal
+        function createProductCard(product, index) {
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
+            productCard.setAttribute('data-index', index);
             
             const isInWish = isInWishlist(product.id);
             const cartQuantity = cart[product.id] || 0;
@@ -3296,15 +4313,14 @@
             modal.className = 'account-modal active';
             modal.style.display = 'flex';
             modal.innerHTML = `
-                <div class="account-content" style="max-width: min(600px, 90vw);">
+                <div class="account-content" style="max-width: min(600px, 90vw); position: relative;">
+                    <button class="account-close-btn" onclick="this.closest('.account-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="account-header">
+                        <h2>${product.name}</h2>
+                    </div>
                     <div style="padding: 30px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                            <h3>${product.name}</h3>
-                            <button class="action-btn" onclick="this.closest('.account-modal').remove()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
                         <div style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-bottom: 30px;">
                             <div>
                                 <img src="${product.image}" alt="${product.name}" 
@@ -3397,7 +4413,7 @@
                 const product = products.find(p => p.id === productId);
                 if (!product) return;
                 
-                const productCard = createProductCard(product);
+                const productCard = createProductCard(product, 0);
                 container.appendChild(productCard);
             });
         }
@@ -3408,13 +4424,17 @@
             if (!container) return;
             
             const cartProductIds = Object.keys(cart).map(id => parseInt(id));
-            const availableProducts = products.filter(p => !cartProductIds.includes(p.id));
+            const wishlistProductIds = [...wishlist];
+            const allViewedIds = [...cartProductIds, ...wishlistProductIds];
+            
+            const availableProducts = products.filter(p => !allViewedIds.includes(p.id));
             
             const recommended = [...availableProducts]
                 .sort((a, b) => {
                     if (a.featured && !b.featured) return -1;
                     if (!a.featured && b.featured) return 1;
-                    return b.rating - a.rating;
+                    if (a.rating !== b.rating) return b.rating - a.rating;
+                    return b.reviews - a.reviews;
                 })
                 .slice(0, 6);
             
@@ -3430,40 +4450,155 @@
                 return;
             }
             
-            recommended.forEach(product => {
-                const productCard = createProductCard(product);
+            recommended.forEach((product, index) => {
+                const productCard = createProductCard(product, index);
                 container.appendChild(productCard);
             });
+            
+            // Initialize scroll reveal for recommendations
+            setTimeout(() => initScrollReveal(), 100);
         }
 
-        // Generate QR Code
+        // Generate QR Code for home page using QRCode.js
         function generateQRCode() {
             const container = document.getElementById('qrCode');
             if (!container) return;
             
-            const websiteUrl = window.location.href;
+            container.innerHTML = '';
+            
+            try {
+                new QRCode(container, {
+                    text: SHARE_LINK,
+                    width: 150,
+                    height: 150,
+                    colorDark: '#8B5CF6',
+                    colorLight: '#FFFFFF',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                container.innerHTML = '<p>QR Code generation failed</p>';
+            }
+        }
+
+        // Generate QR Code for account page using QRCode.js
+        function generateAccountQRCode() {
+            const container = document.getElementById('accountQRCode');
+            if (!container) return;
             
             container.innerHTML = '';
             
-            QRCode.toCanvas(websiteUrl, { 
-                width: 150,
-                height: 150,
-                margin: 1,
-                color: {
-                    dark: '#8B5CF6',
-                    light: '#FFFFFF'
-                }
-            }, function (error, canvas) {
-                if (error) {
-                    console.error('Error generating QR code:', error);
-                    container.innerHTML = '<p>QR Code generation failed</p>';
-                    return;
-                }
-                container.appendChild(canvas);
-            });
+            try {
+                new QRCode(container, {
+                    text: SHARE_LINK,
+                    width: 150,
+                    height: 150,
+                    colorDark: '#8B5CF6',
+                    colorLight: '#FFFFFF',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                container.innerHTML = '<p>QR Code generation failed</p>';
+            }
         }
 
-        // Generate QR code for order
+        // Download receipt as PDF with QR code using jsPDF
+        async function downloadReceiptAsPDF(order) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add store header
+                doc.setFontSize(24);
+                doc.setTextColor(139, 92, 246);
+                doc.text('LUMIÈRE', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Luxury Store', 105, 28, { align: 'center' });
+                doc.text('"Where Beauty Meets Brilliance"', 105, 34, { align: 'center' });
+                
+                // Draw separator line
+                doc.setDrawColor(139, 92, 246);
+                doc.setLineWidth(0.5);
+                doc.line(20, 40, 190, 40);
+                
+                // Order details
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Order #${order.id}`, 20, 50);
+                
+                doc.setFontSize(10);
+                doc.text(`Date: ${formatDate(order.timestamp)}`, 20, 58);
+                doc.text(`Status: ${order.status}`, 20, 64);
+                
+                // Customer details
+                doc.setFontSize(12);
+                doc.text('Customer Details', 20, 75);
+                doc.setFontSize(10);
+                doc.text(`Name: ${order.customer.name}`, 20, 82);
+                doc.text(`Phone: ${order.customer.phone}`, 20, 88);
+                doc.text(`Address: ${order.customer.address}`, 20, 94);
+                
+                // Order items header
+                doc.setFontSize(12);
+                doc.text('Order Items', 20, 105);
+                
+                // Draw table headers
+                doc.setFontSize(10);
+                doc.text('Item', 20, 112);
+                doc.text('Qty', 120, 112);
+                doc.text('Price', 160, 112);
+                doc.line(20, 114, 190, 114);
+                
+                let yPos = 120;
+                
+                // Add order items
+                for (const [productId, quantity] of Object.entries(order.items)) {
+                    const product = products.find(p => p.id === parseInt(productId));
+                    if (product) {
+                        const itemName = product.name.length > 35 ? product.name.substring(0, 32) + '...' : product.name;
+                        doc.text(itemName, 20, yPos);
+                        doc.text(quantity.toString(), 120, yPos);
+                        doc.text(formatKES(product.price * quantity), 160, yPos);
+                        yPos += 8;
+                    }
+                }
+                
+                // Total
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('Total:', 140, yPos + 10);
+                doc.text(formatKES(order.total), 160, yPos + 10);
+                
+                // Generate QR code for the receipt
+                const qrCanvas = await generateOrderQRCode(order);
+                const qrDataUrl = qrCanvas.toDataURL('image/png');
+                
+                // Add QR code to PDF
+                doc.addImage(qrDataUrl, 'PNG', 140, yPos + 20, 40, 40);
+                doc.setFontSize(8);
+                doc.text('Scan to verify order', 160, yPos + 65, { align: 'center' });
+                
+                // Footer
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Thank you for shopping with LUMIÈRE!', 105, yPos + 80, { align: 'center' });
+                doc.text('Contact: +254 111 923 477 | hello@lumiere.com', 105, yPos + 86, { align: 'center' });
+                
+                // Save the PDF
+                doc.save(`lumiere-receipt-${order.id}.pdf`);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                return false;
+            }
+        }
+
+        // Generate QR code for order using QRCode.js
         function generateOrderQRCode(order) {
             return new Promise((resolve, reject) => {
                 const qrCanvas = document.createElement('canvas');
@@ -3472,45 +4607,67 @@
                     orderId: order.id,
                     date: order.timestamp,
                     total: order.total,
-                    customer: order.customer.name
+                    customer: order.customer.name,
+                    items: Object.keys(order.items).length
                 };
                 
-                QRCode.toCanvas(qrCanvas, JSON.stringify(qrData), { 
-                    width: 200,
-                    height: 200,
-                    margin: 1,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                    }
-                }, function(error) {
-                    if (error) {
-                        reject(error);
-                    } else {
+                try {
+                    new QRCode(qrCanvas, {
+                        text: JSON.stringify(qrData),
+                        width: 200,
+                        height: 200,
+                        colorDark: '#000000',
+                        colorLight: '#FFFFFF',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    setTimeout(() => {
                         resolve(qrCanvas);
-                    }
-                });
+                    }, 100);
+                    
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
         // Share functions
         function shareOnWhatsApp() {
-            const message = `Check out LUMIÈRE Luxury Store - Where Beauty Meets Brilliance! ${window.location.href}`;
+            const message = `Check out LUMIÈRE Luxury Store - Where Beauty Meets Brilliance! ${SHARE_LINK}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function shareViaWhatsApp() {
+            const message = `Discover luxury at LUMIÈRE! Shop exquisite jewelry and premium beauty products. ${SHARE_LINK}`;
             window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
         }
 
         function shareOnFacebook() {
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_LINK)}`, '_blank');
+        }
+
+        function shareViaFacebook() {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_LINK)}`, '_blank');
         }
 
         function shareOnTwitter() {
             const text = `LUMIÈRE Luxury Store - Where Beauty Meets Brilliance`;
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SHARE_LINK)}`, '_blank');
+        }
+
+        function shareViaTwitter() {
+            const text = `Discover luxury shopping at LUMIÈRE! ${SHARE_LINK}`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SHARE_LINK)}`, '_blank');
+        }
+
+        function shareViaEmail() {
+            const subject = 'Check out LUMIÈRE Luxury Store';
+            const body = `Hi,\n\nI wanted to share LUMIÈRE Luxury Store with you. They have amazing jewelry and beauty products!\n\nVisit: ${SHARE_LINK}\n\nBest regards`;
+            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
 
         function copyShareLink() {
-            const shareLink = window.location.href;
-            navigator.clipboard.writeText(shareLink)
+            navigator.clipboard.writeText(SHARE_LINK)
                 .then(() => {
                     addNotification('Link copied to clipboard!', 'success');
                 })
@@ -3518,6 +4675,35 @@
                     console.error('Failed to copy link:', err);
                     addNotification('Failed to copy link', 'error');
                 });
+        }
+
+        function copyAccountShareLink() {
+            navigator.clipboard.writeText(SHARE_LINK)
+                .then(() => {
+                    addNotification('Link copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy link:', err);
+                    addNotification('Failed to copy link', 'error');
+                });
+        }
+
+        // Contact developer
+        function contactDeveloper(platform) {
+            switch(platform) {
+                case 'whatsapp':
+                    const whatsappMsg = `Hi Darius, I saw your LUMIÈRE Luxury Store website and wanted to connect regarding development opportunities.`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+                    break;
+                case 'email':
+                    const emailSubject = 'Regarding LUMIÈRE Luxury Store Development';
+                    const emailBody = `Hi Darius,\n\nI saw your LUMIÈRE Luxury Store website and wanted to discuss:\n\n1.\n2.\n3.\n\nBest regards,\n[Your Name]`;
+                    window.open(`mailto:darius@example.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
+                    break;
+                case 'github':
+                    window.open('https://github.com/darius2322', '_blank');
+                    break;
+            }
         }
 
         // Render uncompleted orders (cart items)
@@ -3592,7 +4778,7 @@
             `;
         }
 
-        // Render completed orders - FIXED
+        // Render completed orders
         function renderCompletedOrders() {
             const container = document.getElementById('completedOrdersSection');
             if (!container) return;
@@ -3700,15 +4886,14 @@
                 modal.className = 'account-modal active';
                 modal.style.display = 'flex';
                 modal.innerHTML = `
-                    <div class="account-content" style="max-width: min(400px, 90vw);">
+                    <div class="account-content" style="max-width: min(400px, 90vw); position: relative;">
+                        <button class="account-close-btn" onclick="this.closest('.account-modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="account-header">
+                            <h2>Order QR Code</h2>
+                        </div>
                         <div style="padding: 30px; text-align: center;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <h3>Order QR Code</h3>
-                                <button class="action-btn" onclick="this.closest('.account-modal').remove()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            
                             <div style="margin-bottom: 20px;">
                                 <div style="font-weight: 600; color: var(--primary-purple); margin-bottom: 10px;">
                                     Order #${order.id}
@@ -3750,10 +4935,32 @@
             }
         }
 
+        // Show orders view
+        function showOrdersView(view) {
+            const currentView = document.getElementById('currentCartView');
+            const completedView = document.getElementById('completedOrdersView');
+            const currentBtn = document.querySelector('.order-view-btn[onclick*="current"]');
+            const completedBtn = document.querySelector('.order-view-btn[onclick*="completed"]');
+            
+            if (view === 'current') {
+                currentView.style.display = 'block';
+                completedView.style.display = 'none';
+                currentBtn.classList.add('active');
+                completedBtn.classList.remove('active');
+                renderUncompletedOrders();
+            } else {
+                currentView.style.display = 'none';
+                completedView.style.display = 'block';
+                currentBtn.classList.remove('active');
+                completedBtn.classList.add('active');
+                renderCompletedOrders();
+            }
+        }
+
         // Render orders
         function renderOrders() {
-            renderUncompletedOrders();
-            renderCompletedOrders();
+            // Start with current cart view by default
+            showOrdersView('current');
         }
 
         // Render notifications
@@ -3822,6 +5029,9 @@
             const activeSectionEl = document.getElementById(section);
             if (activeSectionEl) {
                 activeSectionEl.style.display = 'block';
+                
+                // Trigger scroll reveal when section changes
+                setTimeout(() => initScrollReveal(), 300);
             } else {
                 document.getElementById('home').style.display = 'block';
             }
@@ -3855,6 +5065,16 @@
             if (tab === 'orders') renderOrders();
             if (tab === 'wishlist') renderWishlist();
             if (tab === 'notifications') renderNotifications();
+            if (tab === 'share') generateAccountQRCode();
+            
+            // Show/hide mobile toggles based on screen size
+            if (window.innerWidth <= 768) {
+                document.getElementById('mobileToggles').style.display = 'grid';
+                document.querySelector('.account-tabs').style.display = 'none';
+            } else {
+                document.getElementById('mobileToggles').style.display = 'none';
+                document.querySelector('.account-tabs').style.display = 'flex';
+            }
         }
 
         // Close account modal
@@ -3875,10 +5095,17 @@
 
         // Switch account tab
         function switchAccountTab(tab) {
+            // Desktop tabs
             document.querySelectorAll('.account-tab').forEach(tabEl => {
                 tabEl.classList.toggle('active', tabEl.dataset.tab === tab);
             });
             
+            // Mobile toggle buttons
+            document.querySelectorAll('.mobile-toggle-btn').forEach(tabEl => {
+                tabEl.classList.toggle('active', tabEl.dataset.tab === tab);
+            });
+            
+            // Panels
             document.querySelectorAll('.account-panel').forEach(panel => {
                 panel.classList.toggle('active', panel.id === tab + 'Panel');
             });
@@ -3907,6 +5134,7 @@
             if (notification) {
                 notification.read = true;
                 updateNotificationBadge();
+                updateMobileProfileBadges();
                 saveToLocalStorage();
                 renderNotifications();
             }
@@ -3916,6 +5144,7 @@
         function markAllNotificationsAsRead() {
             notifications.forEach(n => n.read = true);
             updateNotificationBadge();
+            updateMobileProfileBadges();
             saveToLocalStorage();
             renderNotifications();
         }
@@ -3924,22 +5153,35 @@
         function deleteNotification(notificationId) {
             notifications = notifications.filter(n => n.id !== notificationId);
             updateNotificationBadge();
+            updateMobileProfileBadges();
             saveToLocalStorage();
             renderNotifications();
         }
 
         // Clear all notifications
         function clearAllNotifications() {
-            notifications = [];
-            updateNotificationBadge();
-            saveToLocalStorage();
-            renderNotifications();
+            if (notifications.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear all notifications?')) {
+                notifications = [];
+                updateNotificationBadge();
+                updateMobileProfileBadges();
+                saveToLocalStorage();
+                renderNotifications();
+            }
         }
 
-        // Checkout
+        // Checkout with terms acceptance check
         function checkout() {
             if (Object.keys(cart).length === 0) {
                 addNotification('Please add items to your cart first', 'error');
+                return;
+            }
+            
+            // Check terms acceptance for new users
+            if (userProfile.isNewUser && !userProfile.acceptedTerms) {
+                addNotification('Please accept the Terms and Conditions in your Profile first', 'error');
+                openAccountModal('profile');
                 return;
             }
             
@@ -3957,16 +5199,20 @@
             cart = {};
             
             updateCartBadge();
+            updateMobileProfileBadges();
             renderCartItems();
             renderUncompletedOrders();
             renderCompletedOrders();
             saveToLocalStorage();
             
+            // Auto-fill message with customer details
             let message = `Hello LUMIÈRE! I'd like to place an order:\n\n`;
-            message += `Customer: ${userProfile.name}\n`;
-            message += `Phone: ${userProfile.phone}\n`;
-            message += `Address: ${userProfile.address}\n\n`;
-            message += `Order Details:\n`;
+            message += `*Customer Details:*\n`;
+            message += `👤 Name: ${userProfile.name}\n`;
+            message += `📞 Phone: ${userProfile.phone}\n`;
+            message += `📧 Email: ${userProfile.email}\n`;
+            message += `📍 Address: ${userProfile.address}\n\n`;
+            message += `*Order Details:*\n`;
             
             for (const [productId, quantity] of Object.entries(order.items)) {
                 const product = products.find(p => p.id === parseInt(productId));
@@ -3975,9 +5221,13 @@
                 }
             }
             
-            message += `\nTotal: ${formatKES(order.total)}\n`;
-            message += `Order Time: ${formatDate(order.timestamp)}\n\n`;
-            message += `Please confirm my order and provide payment instructions.`;
+            message += `\n*Order Summary:*\n`;
+            message += `🛒 Items: ${Object.values(order.items).reduce((a, b) => a + b, 0)}\n`;
+            message += `💰 Subtotal: ${formatKES(order.total)}\n`;
+            message += `🚚 Shipping: FREE (Orders over KES 10,000)\n`;
+            message += `💳 Total: ${formatKES(order.total)}\n\n`;
+            message += `📅 Order Time: ${formatDate(order.timestamp)}\n\n`;
+            message += `Please confirm my order and provide payment instructions. Thank you!`;
             
             addNotification('Order created! Proceeding to WhatsApp checkout...', 'success');
             
@@ -4028,23 +5278,20 @@
             modal.className = 'account-modal active';
             modal.style.display = 'flex';
             modal.innerHTML = `
-                <div class="account-content" style="max-width: min(500px, 90vw);">
+                <div class="account-content" style="max-width: min(500px, 90vw); position: relative;">
+                    <button class="account-close-btn" onclick="this.closest('.account-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="account-header">
+                        <h2>Order Details</h2>
+                    </div>
                     <div style="padding: 30px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-                            <div>
-                                <h3>Order #${order.id}</h3>
-                                <div class="order-status completed" style="display: inline-block; margin-top: 5px;">Completed</div>
-                            </div>
-                            <button class="action-btn" onclick="this.closest('.account-modal').remove()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
                         <div style="margin-bottom: 25px;">
                             <div style="font-weight: 600; margin-bottom: 10px;">Customer Details</div>
                             <div style="background-color: rgba(139, 92, 246, 0.05); padding: 15px; border-radius: 10px;">
                                 <div><strong>Name:</strong> ${order.customer.name}</div>
                                 <div><strong>Phone:</strong> ${order.customer.phone}</div>
+                                <div><strong>Email:</strong> ${order.customer.email}</div>
                                 <div><strong>Address:</strong> ${order.customer.address}</div>
                             </div>
                         </div>
@@ -4103,7 +5350,7 @@
             }
         }
 
-        // Download order receipt with QR code
+        // Download order receipt with PDF and QR code
         async function downloadOrderReceipt(orderId) {
             const order = orders.find(o => o.id === orderId);
             if (!order) return;
@@ -4112,116 +5359,20 @@
             saveToLocalStorage();
             
             try {
-                // Generate QR code
-                const qrCanvas = await generateOrderQRCode(order);
-                const qrDataUrl = qrCanvas.toDataURL('image/png');
+                // Generate PDF receipt with QR code
+                const success = await downloadReceiptAsPDF(order);
                 
-                // Generate receipt text with QR code reference
-                let receipt = `╔══════════════════════════════════════════════════════════╗\n`;
-                receipt += `║                LUMIÈRE LUXURY STORE                  ║\n`;
-                receipt += `║           "${SLOGAN}"                       ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║ Order ID: ${order.id.toString().padEnd(41)} ║\n`;
-                receipt += `║ Date: ${formatDate(order.timestamp).padEnd(44)} ║\n`;
-                receipt += `║ Status: ${order.status.padEnd(43)} ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║                    CUSTOMER DETAILS                     ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║ Name: ${order.customer.name.padEnd(46)} ║\n`;
-                receipt += `║ Phone: ${order.customer.phone.padEnd(45)} ║\n`;
-                receipt += `║ Address: ${order.customer.address.substring(0, 40).padEnd(41)} ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║                      ORDER ITEMS                        ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                
-                for (const [productId, quantity] of Object.entries(order.items)) {
-                    const product = products.find(p => p.id === parseInt(productId));
-                    if (product) {
-                        const line = `${product.name.substring(0, 35).padEnd(36)} × ${quantity.toString().padEnd(2)} = ${formatKES(product.price * quantity).padEnd(12)}`;
-                        receipt += `║ ${line.padEnd(52)} ║\n`;
-                    }
+                if (success) {
+                    addNotification('PDF receipt downloaded with QR code!', 'success');
+                    renderCompletedOrders();
+                } else {
+                    throw new Error('PDF generation failed');
                 }
-                
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║ TOTAL: ${formatKES(order.total).padEnd(48)} ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║           Downloaded: ${formatDate(order.downloadedAt).padEnd(35)} ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║     QR Code available at:                                ║\n`;
-                receipt += `║     ${qrDataUrl.substring(0, 50)}... ║\n`;
-                receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-                receipt += `║     Thank you for shopping with LUMIÈRE!                 ║\n`;
-                receipt += `║     Contact: +254 111 923 477 | hello@lumiere.com        ║\n`;
-                receipt += `╚══════════════════════════════════════════════════════════╝\n`;
-                
-                // Create combined content with QR code image reference
-                const combinedContent = `LUMIÈRE ORDER RECEIPT\n\n${receipt}\n\nQR Code Data URL (Scan with QR reader):\n${qrDataUrl}`;
-                
-                downloadFile(combinedContent, `lumiere-receipt-${order.id}.txt`);
-                addNotification('Receipt downloaded with QR code reference!', 'success');
-                
-                renderCompletedOrders();
                 
             } catch (error) {
-                console.error('Error generating receipt with QR:', error);
-                // Fallback to text-only receipt
-                generateTextReceipt(order);
+                console.error('Error generating PDF receipt:', error);
+                addNotification('Failed to generate PDF receipt', 'error');
             }
-        }
-
-        // Generate text-only receipt (fallback)
-        function generateTextReceipt(order) {
-            let receipt = `╔══════════════════════════════════════════════════════════╗\n`;
-            receipt += `║                LUMIÈRE LUXURY STORE                  ║\n`;
-            receipt += `║           "${SLOGAN}"                       ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║ Order ID: ${order.id.toString().padEnd(41)} ║\n`;
-            receipt += `║ Date: ${formatDate(order.timestamp).padEnd(44)} ║\n`;
-            receipt += `║ Status: ${order.status.padEnd(43)} ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║                    CUSTOMER DETAILS                     ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║ Name: ${order.customer.name.padEnd(46)} ║\n`;
-            receipt += `║ Phone: ${order.customer.phone.padEnd(45)} ║\n`;
-            receipt += `║ Address: ${order.customer.address.substring(0, 40).padEnd(41)} ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║                      ORDER ITEMS                        ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            
-            for (const [productId, quantity] of Object.entries(order.items)) {
-                const product = products.find(p => p.id === parseInt(productId));
-                if (product) {
-                    const line = `${product.name.substring(0, 35).padEnd(36)} × ${quantity.toString().padEnd(2)} = ${formatKES(product.price * quantity).padEnd(12)}`;
-                    receipt += `║ ${line.padEnd(52)} ║\n`;
-                }
-            }
-            
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║ TOTAL: ${formatKES(order.total).padEnd(48)} ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║           Downloaded: ${formatDate(order.downloadedAt).padEnd(35)} ║\n`;
-            receipt += `╠══════════════════════════════════════════════════════════╣\n`;
-            receipt += `║     Thank you for shopping with LUMIÈRE!                 ║\n`;
-            receipt += `║     Contact: +254 111 923 477 | hello@lumiere.com        ║\n`;
-            receipt += `╚══════════════════════════════════════════════════════════╝\n`;
-            
-            downloadFile(receipt, `lumiere-receipt-${order.id}.txt`);
-            addNotification('Receipt downloaded successfully!', 'success');
-            
-            renderCompletedOrders();
-        }
-
-        // Download file
-        function downloadFile(content, filename) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         // Reorder
@@ -4234,6 +5385,7 @@
             }
             
             updateCartBadge();
+            updateMobileProfileBadges();
             renderCartItems();
             renderUncompletedOrders();
             addNotification('Items added to cart from previous order', 'success');
@@ -4329,6 +5481,27 @@
             return true;
         }
 
+        // Initialize scroll reveal for 2-column grid
+        function initScrollReveal() {
+            const productCards = document.querySelectorAll('.two-column-grid .product-card');
+            
+            productCards.forEach((card, index) => {
+                // Remove existing revealed class
+                card.classList.remove('revealed');
+                
+                // Check if element is in viewport
+                const rect = card.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                
+                if (rect.top < windowHeight - 100) {
+                    // Add revealed class with delay for staggered effect
+                    setTimeout(() => {
+                        card.classList.add('revealed');
+                    }, index * 100); // Stagger animation based on index
+                }
+            });
+        }
+
         // Attach event listeners
         function attachEventListeners() {
             // Theme toggle
@@ -4350,7 +5523,7 @@
                 document.getElementById('cartSidebar').classList.remove('active');
             });
 
-            // Notifications toggle
+            // Notifications toggle (desktop only)
             document.getElementById('notificationsBtn').addEventListener('click', () => {
                 openNotificationsModal();
             });
@@ -4366,6 +5539,19 @@
             // Profile form
             document.getElementById('profileForm').addEventListener('submit', (e) => {
                 e.preventDefault();
+                
+                // Check terms acceptance for new users
+                if (userProfile.isNewUser && !userProfile.acceptedTerms) {
+                    const acceptTerms = document.getElementById('acceptTerms');
+                    if (!acceptTerms || !acceptTerms.checked) {
+                        addNotification('Please accept the Terms and Conditions', 'error');
+                        return;
+                    }
+                    userProfile.acceptedTerms = true;
+                    userProfile.isNewUser = false;
+                    document.getElementById('termsAcceptanceSection').style.display = 'none';
+                }
+                
                 userProfile.name = document.getElementById('profileName').value;
                 userProfile.email = document.getElementById('profileEmail').value;
                 userProfile.phone = document.getElementById('profilePhone').value;
@@ -4390,8 +5576,15 @@
                 }
             });
 
-            // Account tabs
+            // Desktop account tabs
             document.querySelectorAll('.account-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchAccountTab(tab.dataset.tab);
+                });
+            });
+
+            // Mobile account toggle buttons
+            document.querySelectorAll('.mobile-toggle-btn').forEach(tab => {
                 tab.addEventListener('click', () => {
                     switchAccountTab(tab.dataset.tab);
                 });
@@ -4460,8 +5653,35 @@
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) {
                     document.getElementById('mobileMenu').style.display = 'none';
+                    document.getElementById('mobileToggles').style.display = 'none';
+                    document.querySelector('.account-tabs').style.display = 'flex';
+                } else {
+                    document.querySelector('.account-tabs').style.display = 'none';
+                    document.getElementById('mobileToggles').style.display = 'grid';
                 }
             });
+
+            // Scroll event for reveal animations
+            window.addEventListener('scroll', initScrollReveal);
+
+            // Hide desktop-only elements on mobile
+            function updateMobileDisplay() {
+                const isMobile = window.innerWidth <= 768;
+                const wishlistBtn = document.getElementById('wishlistBtn');
+                const notificationsBtn = document.getElementById('notificationsBtn');
+                
+                if (isMobile) {
+                    wishlistBtn.style.display = 'none';
+                    notificationsBtn.style.display = 'none';
+                } else {
+                    wishlistBtn.style.display = 'flex';
+                    notificationsBtn.style.display = 'flex';
+                }
+            }
+
+            // Initial mobile display update
+            updateMobileDisplay();
+            window.addEventListener('resize', updateMobileDisplay);
         }
 
         // CSS animations
@@ -4477,6 +5697,10 @@
             }
             @keyframes slideIn {
                 from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            @keyframes slideUp {
+                from { transform: translateY(50px); opacity: 0; }
                 to { transform: translateY(0); opacity: 1; }
             }
             .btn-sm {
@@ -4495,8 +5719,37 @@
             .filters-section {
                 animation: slideIn 0.3s ease-out;
             }
+            
+            /* Scroll reveal animations for 2-column grid */
+            .two-column-grid .product-card {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: all 0.6s ease-out;
+            }
+            
+            .two-column-grid .product-card.revealed {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            
+            /* Staggered animation for 2-column grid */
+            .two-column-grid .product-card:nth-child(2n) {
+                transition-delay: 0.1s;
+            }
+            
+            .two-column-grid .product-card:nth-child(2n+1) {
+                transition-delay: 0.2s;
+            }
         `;
         document.head.appendChild(style);
+        
+        // Hide desktop-only icons on mobile initially
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('wishlistBtn').style.display = 'none';
+                document.getElementById('notificationsBtn').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
